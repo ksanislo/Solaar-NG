@@ -518,23 +518,24 @@ class Device:
             self.online = active
             was_active, self._active = self._active, active
             if active:
-                # Push settings for new devices when devices request software reconfiguration
-                # and when devices become active if they don't have wireless device status feature,
-                if (
+                # Push settings for new devices, when devices request software reconfiguration,
+                # and when devices become active if they don't have wireless device status feature.
+                needs_push = (
                     was_active is None
                     or not was_active
                     or push
-                    and (not self.features or SupportedFeature.WIRELESS_DEVICE_STATUS not in self.features)
-                ):
+                    or (not self.features or SupportedFeature.WIRELESS_DEVICE_STATUS not in self.features)
+                )
+                if needs_push:
                     if logger.isEnabledFor(logging.INFO):
                         logger.info("%s pushing device settings %s", self, self.settings)
                     settings.apply_all_settings(self)
                 if not was_active:
                     if self.protocol < 2.0:  # Make sure to set notification flags on the device
                         self.notification_flags = self.enable_connection_notifications()
-                    else:
-                        self.set_configuration(0x11)  # signal end of configuration
                     self.read_battery()  # battery information may have changed so try to read it now
+                if needs_push and self.protocol >= 2.0:
+                    self.set_configuration(0x11)  # signal end of configuration
             elif was_active and self.receiver and not isinstance(self.receiver, CenturionReceiver):
                 hidpp10.set_configuration_pending_flags(self.receiver, 0xFF)
         if logger.isEnabledFor(logging.DEBUG):
