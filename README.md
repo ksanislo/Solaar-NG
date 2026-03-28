@@ -11,7 +11,7 @@ Support is expanded to include the following devices:
 
 All features of the PRO X 2 LS headphones are supported (Mic SNR, side tone, sleep mode, EQ) and those same features should be supported on the G522 (alternate version of the new transport) and any other headphone models which use either style of the centurion transport protocol.
 
-Support can be added for additional features if someone who owns a pair of them is willing to help with testing. Please create a new issue with a subject containing your headphone model if you're willing to help get your model fully supported.
+Support can be added for additional features if someone who owns a pair of headphones supporting them is willing to help with testing. Please create a new issue with a subject containing your headphone model if you're willing to help get your model fully supported.
 
 There are also a number of other less important bug fixes included, and some other minor tweaks to Solaar's behavior that I've been working with. Please let me know with a new github issue if you find any new bugs that I've introduced in this fork.
 
