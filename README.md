@@ -1,4 +1,5 @@
-Solaar-NG
+# Solaar-NG
+
 A custom fork of Solaar for testing of pre-merge features
 
 Welcome! This is my unoffical fork of Solaar to make it easier for people to be able to test out all of my Solaar improvements which have not yet been merged upstream.
