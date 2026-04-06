@@ -6,7 +6,7 @@ Welcome! This is my unoffical fork of Solaar to make it easier for people to be 
 
 Support is expanded to include the following devices:
  - G515 LS TKL Keyboard
- - PRO X 2 LIGHTSPEED headphones 
+ - PRO X 2 LIGHTSPEED headphones
  - G522 LIGHTSPEED headphones
 
 All features of the PRO X 2 LS headphones are supported (Mic SNR, side tone, sleep mode, EQ) and those same features should be supported on the G522 (alternate version of the new transport) and any other headphone models which use either style of the centurion transport protocol.
