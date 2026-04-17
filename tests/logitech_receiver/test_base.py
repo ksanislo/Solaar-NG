@@ -313,3 +313,107 @@ class TestUnwrapCenturionFrame:
         assert result[0] == 0x11
         assert result[1] == 0xFF
         assert result[2:63] == payload
+
+
+class TestProbeCenturionDeviceAddr:
+    """Test probe_centurion_device_addr: brute-force write for all 256 addrs, then read."""
+
+    HANDLE = 101
+
+    def setup_method(self):
+        base._centurion_handles.pop(self.HANDLE, None)
+
+    def teardown_method(self):
+        base._centurion_handles.pop(self.HANDLE, None)
+
+    def test_learns_addr_on_first_hit(self):
+        """Probe finds addr=0x23 on candidate #36 (0-indexed 0x23=35) and stops."""
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        reply = bytes([0x50, 0x23, 0x03, 0x00]) + b"\x00" * 60
+
+        def read_side_effect(_handle, _size, _timeout):
+            # Return a response only after the write with addr=0x23
+            if mock_write.call_count == 0x24:  # 0x23 is the 36th write (1-indexed)
+                return reply
+            return None
+
+        with (
+            mock.patch.object(base.hidapi, "write") as mock_write,
+            mock.patch.object(base.hidapi, "read", side_effect=read_side_effect),
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is True
+        assert state.device_addr == 0x23
+        # Short-circuit: stopped at candidate 0x23 (36 writes), not all 256
+        assert mock_write.call_count == 0x24
+
+    def test_skips_non_matching_read_until_match(self):
+        """Non-0x50 frames in the read are ignored; next candidate's read succeeds."""
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        noise = b"\x11\xff" + b"\x00" * 62
+        match = bytes([0x50, 0x42, 0x03, 0x00]) + b"\x00" * 60
+        # Reads cycle: noise, noise, match — so addr is found on 3rd candidate
+        with (
+            mock.patch.object(base.hidapi, "write"),
+            mock.patch.object(base.hidapi, "read", side_effect=[noise, noise, match]),
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is True
+        assert state.device_addr == 0x42
+
+    def test_returns_false_when_no_response(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        with (
+            mock.patch.object(base.hidapi, "write"),
+            mock.patch.object(base.hidapi, "read", return_value=None),
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is False
+        assert state.device_addr is None
+
+    def test_noop_for_0x51_variant(self):
+        state = CenturionHandleState(report_id=CENTURION_REPORT_ID)
+        with (
+            mock.patch.object(base.hidapi, "write") as mock_write,
+            mock.patch.object(base.hidapi, "read") as mock_read,
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is False
+        assert state.device_addr is None
+        mock_write.assert_not_called()
+        mock_read.assert_not_called()
+
+    def test_noop_when_addr_already_known(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID, device_addr=0x23)
+        with (
+            mock.patch.object(base.hidapi, "write") as mock_write,
+            mock.patch.object(base.hidapi, "read") as mock_read,
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is False
+        assert state.device_addr == 0x23
+        mock_write.assert_not_called()
+        mock_read.assert_not_called()
+
+    def test_aborts_on_repeated_write_failure(self):
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        with (
+            mock.patch.object(base.hidapi, "write", side_effect=OSError("no device")),
+            mock.patch.object(base.hidapi, "read") as mock_read,
+        ):
+            result = base.probe_centurion_device_addr(self.HANDLE, state)
+        assert result is False
+        assert state.device_addr is None
+        mock_read.assert_not_called()
+
+    def test_write_frames_have_sequential_addrs(self):
+        """Verify each write uses a different device_addr from 0x00 to 0xFF."""
+        state = CenturionHandleState(report_id=CENTURION_ADDRESSED_REPORT_ID)
+        with (
+            mock.patch.object(base.hidapi, "write") as mock_write,
+            mock.patch.object(base.hidapi, "read", return_value=None),  # no response → scans all 256
+        ):
+            base.probe_centurion_device_addr(self.HANDLE, state)
+        assert mock_write.call_count == 256
+        addrs_sent = [mock_write.call_args_list[i][0][1][1] for i in range(256)]
+        assert addrs_sent == list(range(256))

@@ -80,7 +80,9 @@ def create_device(low_level: LowLevelInterface, device_info, setting_callback=No
         if handle:
             if getattr(device_info, "centurion", False):
                 report_id = getattr(device_info, "centurion_report_id", None) or base.CENTURION_REPORT_ID
-                base._centurion_handles[int(handle)] = base.CenturionHandleState(report_id=report_id)
+                state = base.CenturionHandleState(report_id=report_id)
+                base._centurion_handles[int(handle)] = state
+                base.probe_centurion_device_addr(handle, state)
             # a direct connected device might not be online (as reported by user)
             return Device(
                 low_level,
@@ -221,7 +223,9 @@ class Device:
             self._protocol = self.descriptor.protocol if self.descriptor.protocol else None
             self.registers = self.descriptor.registers if self.descriptor.registers else []
 
-        if self._protocol is not None:
+        # Centurion devices always use HID++ 2.0 features regardless of the
+        # protocol version the dongle reports (e.g. G522 reports 1.1).
+        if self._protocol is not None and not self.centurion:
             self.features = {} if self._protocol < 2.0 else hidpp20.FeaturesArray(self)
         else:
             self.features = hidpp20.FeaturesArray(self)  # may be a 2.0 device; if not, it will fix itself later
@@ -241,7 +245,13 @@ class Device:
                 self.ping()
             except exceptions.NoSuchDevice:
                 logger.warning("device %s inaccessible - no protocol set", self)
-        return self._protocol or 0
+        result = self._protocol or 0
+        # Centurion devices always use HID++ 2.0 features regardless of the
+        # protocol version the dongle reports (e.g. G522 reports 1.1).
+        # Ensure all `protocol < 2.0` gates route through the 2.0 code path.
+        if self.centurion and result < 2.0:
+            return 2.0
+        return result
 
     @property
     def codename(self):
@@ -472,6 +482,15 @@ class Device:
 
     def battery(self):  # None  or  level, next, status, voltage
         if self.protocol < 2.0:
+            if self.centurion:
+                logger.warning(
+                    "%s: battery() dispatching HID++ 1.0 path for a Centurion device "
+                    "(protocol=%s, _protocol=%s) — device_addr probe likely failed, "
+                    "expect INVALID_SUB_ID_COMMAND",
+                    self,
+                    self.protocol,
+                    self._protocol,
+                )
             return _hidpp10.get_battery(self)
         else:
             battery_feature = self.persister.get("_battery", None) if self.persister else None
@@ -634,6 +653,18 @@ class Device:
                 # Ensure sub-device features are discovered before routing decision
                 if self.features is not None:
                     self.features._check()
+                # Guard against Centurion/HID++ 2.0 feature ID collisions. IntEnum
+                # members with the same int value hash equal, so a dict lookup for
+                # SupportedFeature.DEVICE_NAME (0x0005) succeeds even when the
+                # device actually has CenturionCoreFeature.MULTI_HOST_CONTROL at
+                # that slot. If the type of the stored enum differs from what the
+                # caller asked for, treat the feature as unsupported.
+                if self.features is not None:
+                    idx = self.features.get(feature)
+                    if idx is not None:
+                        stored = self.features.inverse.get(idx)
+                        if stored is not None and type(stored) is not type(feature):
+                            return None
                 if feature in getattr(self, "_centurion_sub_features", ()):
                     sub_idx = self.features.get(feature)
                     if sub_idx is not None:
