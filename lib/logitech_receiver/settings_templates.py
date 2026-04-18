@@ -1673,9 +1673,49 @@ class HeadsetMicGain(settings.Setting):
     feature = _F.HEADSET_MIC_GAIN
     rw_options = {"read_fnid": 0x10, "write_fnid": 0x20}
     validator_class = settings_validator.RangeValidator
+    # Fallback range covers int8; build() overrides with device-reported bounds
+    # from GetInfo (fn 0) so SetMicGain doesn't get device-specific
+    # out-of-range NACK (error 0x0B) on devices that use a small signed range
+    # (e.g. G522 reports a narrow window like -12..+12).
     min_value = -128
     max_value = 127
     validator_options = {"byte_count": 1, "signed": True}
+
+    @classmethod
+    def build(cls, device):
+        # GetInfo (function 0) returns [min_gain (int8), max_gain (int8)].
+        # LGHUB caches these once at startup to rescale SetMicGain writes.
+        try:
+            info = device.feature_request(cls.feature, 0x00)
+        except Exception as e:
+            logger.info("HeadsetMicGain: GetInfo raised %s, using fallback int8 range", e)
+            info = None
+        if info and len(info) >= 2:
+            min_gain = struct.unpack("b", bytes([info[0]]))[0]
+            max_gain = struct.unpack("b", bytes([info[1]]))[0]
+            if max_gain <= min_gain:  # sanity — fall back to class defaults
+                logger.info(
+                    "HeadsetMicGain: GetInfo returned nonsense range [%d, %d] (hex=%s), using fallback int8 range",
+                    min_gain,
+                    max_gain,
+                    info.hex(),
+                )
+                min_gain, max_gain = cls.min_value, cls.max_value
+            else:
+                logger.info(
+                    "HeadsetMicGain: device reports gain range [%d, %d]",
+                    min_gain,
+                    max_gain,
+                )
+        else:
+            logger.info(
+                "HeadsetMicGain: GetInfo returned %s, using fallback int8 range",
+                info.hex() if info else info,
+            )
+            min_gain, max_gain = cls.min_value, cls.max_value
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = settings_validator.RangeValidator(min_value=min_gain, max_value=max_gain, byte_count=1, signed=True)
+        return cls(device, rw, validator)
 
 
 class HeadsetMixBalance(settings.Setting):
@@ -1697,8 +1737,26 @@ class HeadsetAutoSleep(settings.Setting):
     rw_options = {"read_fnid": 0x00, "write_fnid": 0x10}
     validator_class = settings_validator.RangeValidator
     min_value = 0
-    max_value = 255
+    # Timer byte count depends on feature version:
+    #   V<3 : 1 byte (0-255)
+    #   V=3 : 2 bytes (0-65535)
+    #   V>=4: 3 bytes (0-16777215)
+    # build() picks the correct width based on the device's reported version.
+    max_value = 0xFFFFFF
     validator_options = {"byte_count": 1}
+
+    @classmethod
+    def build(cls, device):
+        version = device.features.get_feature_version(cls.feature) or 0
+        if version >= 4:
+            byte_count, max_value = 3, 0xFFFFFF
+        elif version >= 3:
+            byte_count, max_value = 2, 0xFFFF
+        else:
+            byte_count, max_value = 1, 0xFF
+        rw = settings.FeatureRW(cls.feature, **cls.rw_options)
+        validator = settings_validator.RangeValidator(min_value=0, max_value=max_value, byte_count=byte_count)
+        return cls(device, rw, validator)
 
 
 class HeadsetOnboardEQ(settings.RangeFieldSetting):
