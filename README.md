@@ -1,19 +1,16 @@
 # Solaar-NG
 
-A custom fork of Solaar for testing of pre-merge features
+A custom fork of Solaar for testing of pre-merge features.
 
-Welcome! This is my unoffical fork of Solaar to make it easier for people to be able to test out all of my Solaar improvements which have not yet been merged upstream.
+Most of the work that originally lived in this fork has now been merged into upstream Solaar — including support for the G515 LS TKL keyboard and the PRO X 2 LIGHTSPEED headphones. The only remaining fork-only feature is **G522 LIGHTSPEED headphones support**, and that is also under active review for upstream merge.
 
-Support is expanded to include the following devices:
- - G515 LS TKL Keyboard
- - PRO X 2 LIGHTSPEED headphones
- - G522 LIGHTSPEED headphones
+If you don't have a G522, you should generally just use upstream Solaar — it has everything else that used to be unique to this fork.
 
-All features of the PRO X 2 LS headphones are supported (Mic SNR, side tone, sleep mode, EQ) and those same features should be supported on the G522 (alternate version of the new transport) and any other headphone models which use either style of the centurion transport protocol.
+If you do have a G522 (or another headphone using the same Centurion transport variant), this fork still gives you working support today. Features include Mic SNR, side tone, sleep mode, and EQ, mirroring what's already supported on the PRO X 2 LS.
 
 Support can be added for additional features if someone who owns a pair of headphones supporting them is willing to help with testing. Please create a new issue with a subject containing your headphone model if you're willing to help get your model fully supported.
 
-There are also a number of other less important bug fixes included, and some other minor tweaks to Solaar's behavior that I've been working with. Please let me know with a new github issue if you find any new bugs that I've introduced in this fork.
+Please let me know with a new github issue if you find any bugs that are present in this fork but not in upstream Solaar.
 
 Happy testing,
 Ken Sanislo
