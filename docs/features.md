@@ -28,6 +28,15 @@ Feature                                | ID       | Status             | Notes
 `DFUCONTROL_UNSIGNED`                  | `0x00C1` | Unsupported        |
 `DFUCONTROL_SIGNED`                    | `0x00C2` | Unsupported        |
 `DFU`                                  | `0x00D0` | Unsupported        |
+`HEADSET_MIC_MUTE`                     | `0x0601` | Supported          | `HeadsetMicMute`
+`HEADSET_MIC_SNR`                      | `0x0602` | Supported          | `HeadsetMicSNR`
+`HEADSET_AUDIO_SIDETONE`               | `0x0604` | Supported          | `HeadsetSidetone`
+`HEADSET_MIX`                          | `0x0609` | Supported          | `HeadsetMixBalance`
+`HEADSET_AI_NOISE_REDUCTION`           | `0x060E` | Supported          | `HeadsetAINR`, `HeadsetAINRLevel`
+`HEADSET_MIC_GAIN`                     | `0x0611` | Supported          | `HeadsetMicGain`
+`HEADSET_BATTERY_SAVER`                | `0x0618` | Supported          | `HeadsetEcoMode`
+`HEADSET_DO_NOT_DISTURB`               | `0x0631` | Supported          | `HeadsetDoNotDisturb`
+`HEADSET_ONBOARD_EQ`                   | `0x0636` | Supported          | `HeadsetOnboardEQ`
 `BATTERY_STATUS`                       | `0x1000` | Supported          | `get_battery`, read only
 `BATTERY_VOLTAGE`                      | `0x1001` | Supported          | `get_voltage`, read only
 `UNIFIED_BATTERY`		       | `0x1004` | Supported          | `get_battery`, read only
