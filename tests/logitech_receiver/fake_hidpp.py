@@ -432,7 +432,7 @@ class Device:
         if not hasattr(self, "_bridge_responses"):
             self._bridge_responses = {}
 
-    def request(self, id, *params, no_reply=False, long_message=False, protocol=2.0):
+    def request(self, id, *params, no_reply=False, long_message=False, protocol=2.0, return_error=False):
         params = b"".join(pack("B", p) if isinstance(p, int) else p for p in params)
         print("REQUEST ", self._name, hex(id), params.hex().upper())
         for r in self.responses:

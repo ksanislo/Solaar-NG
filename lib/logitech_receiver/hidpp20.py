@@ -1751,11 +1751,13 @@ yaml.SafeLoader.add_constructor("!OnboardProfiles", OnboardProfiles.from_yaml)
 yaml.add_representer(OnboardProfiles, OnboardProfiles.to_yaml)
 
 
-def feature_request(device, feature, function=0x00, *params, no_reply=False):
+def feature_request(device, feature, function=0x00, *params, no_reply=False, return_error=False):
     if device.online and device.features:
         if feature in device.features:
             feature_index = device.features[feature]
-            return device.request((feature_index << 8) + (function & 0xFF), *params, no_reply=no_reply)
+            return device.request(
+                (feature_index << 8) + (function & 0xFF), *params, no_reply=no_reply, return_error=return_error
+            )
     if logger.isEnabledFor(logging.WARN):
         logger.warning(
             "%s: feature request failure for device online %s and features %s", device, device.online, device.features

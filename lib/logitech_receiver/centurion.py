@@ -57,11 +57,10 @@ def get_firmware_centurion(device):
     fw = []
     seen = set()  # track response signatures to detect duplicates
     for index in range(0, 8):  # try up to 8 entities
-        try:
-            report = device.feature_request(SupportedFeature.CENTURION_DEVICE_INFO, 0x10, index)
-        except exceptions.FeatureCallError:
-            break
-        if not report or len(report) < 5:
+        # The device has no firmware-entity count, so we probe until it errors.
+        # return_error keeps that expected end-of-list error out of the log.
+        report = device.feature_request(SupportedFeature.CENTURION_DEVICE_INFO, 0x10, index, return_error=True)
+        if not isinstance(report, bytes) or len(report) < 5:
             break
         # Dedup: parent device returns the same response for every entity index
         sig = bytes(report[: 5 + report[4]])
@@ -304,14 +303,21 @@ class CenturionReceiver:
     def device_codename(self, n):
         return self._usb_name
 
-    def request(self, request_id, *params, no_reply=False):
+    def request(self, request_id, *params, no_reply=False, return_error=False):
         """Send an HID++ request directly to the dongle (not through bridge)."""
         if self.handle:
             return self.low_level.request(
-                self.handle, 0xFF, request_id, *params, no_reply=no_reply, long_message=True, protocol=2.0
+                self.handle,
+                0xFF,
+                request_id,
+                *params,
+                no_reply=no_reply,
+                long_message=True,
+                protocol=2.0,
+                return_error=return_error,
             )
 
-    def feature_request(self, feature, function=0x00, *params, no_reply=False):
+    def feature_request(self, feature, function=0x00, *params, no_reply=False, return_error=False):
         """Send a feature request to the dongle using discovered feature indices."""
         if self._dongle_features is None:
             self._discover_dongle_features()
@@ -319,7 +325,7 @@ class CenturionReceiver:
         for _feat, feat_id, index in self._dongle_features or []:
             if feat_id == feature_int:
                 request_id = (index << 8) | (function & 0xFF)
-                return self.request(request_id, *params, no_reply=no_reply)
+                return self.request(request_id, *params, no_reply=no_reply, return_error=return_error)
         raise exceptions.FeatureNotSupported(feature=feature)
 
     def _discover_dongle_features(self):

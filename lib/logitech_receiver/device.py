@@ -690,7 +690,7 @@ class Device:
                 return ret
         return None
 
-    def request(self, request_id, *params, no_reply=False):
+    def request(self, request_id, *params, no_reply=False, return_error=False):
         if self:
             long = self.hidpp_long is True or (
                 self.hidpp_long is None and (self.bluetooth or self._protocol is not None and self._protocol >= 2.0)
@@ -706,6 +706,7 @@ class Device:
                 no_reply=no_reply,
                 long_message=long,
                 protocol=self.protocol,
+                return_error=return_error,
             )
         if logger.isEnabledFor(logging.WARN):
             logger.warning(
@@ -716,7 +717,7 @@ class Device:
                 self.receiver._devices if self.receiver else None,
             )
 
-    def feature_request(self, feature, function=0x00, *params, no_reply=False):
+    def feature_request(self, feature, function=0x00, *params, no_reply=False, return_error=False):
         if self.protocol >= 2.0:
             if self.centurion:
                 # Ensure sub-device features are discovered before routing decision
@@ -738,7 +739,7 @@ class Device:
                     sub_idx = self.features.get(feature)
                     if sub_idx is not None:
                         return self.centurion_bridge_request(sub_idx, function, *params, no_reply=no_reply)
-            return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply)
+            return hidpp20.feature_request(self, feature, function, *params, no_reply=no_reply, return_error=return_error)
         if logger.isEnabledFor(logging.WARN):
             logger.warning("%s: feature request failure for device with protocol %s", self, self.protocol)
 

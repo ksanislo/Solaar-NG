@@ -751,7 +751,11 @@ def request(
                             error_name = Hidpp20ErrorCode(error)
                         except ValueError:
                             error_name = f"unknown:{error:02X}"
-                        logger.error(
+                        # return_error: the caller expects this call may fail
+                        # (e.g. probing an enumeration past its end), so log
+                        # quietly and hand back the error code instead of raising.
+                        logger.log(
+                            logging.DEBUG if return_error else logging.ERROR,
                             "(%s) device %d error on feature request {%04X}: %d = %s",
                             handle,
                             devnumber,
@@ -759,6 +763,8 @@ def request(
                             error,
                             error_name,
                         )
+                        if return_error:
+                            return error
                         raise exceptions.FeatureCallError(
                             number=devnumber,
                             request=request_id,

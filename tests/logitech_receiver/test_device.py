@@ -367,10 +367,10 @@ def test_device_complex(device_info, responses, protocol, led, keys, remap, gest
 
     test_device.set_configuration(55)
     if protocol > 1.0:
-        spy_request.assert_called_with(0x210, 55, no_reply=False)
+        spy_request.assert_called_with(0x210, 55, no_reply=False, return_error=False)
     test_device.reset()
     if protocol > 1.0:
-        spy_request.assert_called_with(0x210, 0, no_reply=False)
+        spy_request.assert_called_with(0x210, 0, no_reply=False, return_error=False)
 
 
 @pytest.mark.parametrize(
