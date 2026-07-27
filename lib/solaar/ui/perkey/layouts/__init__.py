@@ -28,6 +28,7 @@ from collections.abc import Callable
 from ..layout import Layout
 from . import headset_g522
 from . import keyboard_ansi
+from . import keyboard_g512
 from . import keyboard_iso_azerty
 from . import keyboard_iso_qwerty
 from . import keyboard_iso_qwertz
@@ -177,6 +178,30 @@ def _pro_x_rapid_matcher(family: str) -> Callable[[dict], bool]:
 # Registered ahead of the generic family matchers so it wins for this model.
 for _family, (_full, _tkl) in _FAMILY_LAYOUTS.items():
     register_layout(0x8081, _pro_x_rapid_matcher(_family), keyboard_pro_x_rapid.with_media_top_row(_tkl))
+
+
+def _g512_matcher(family: str) -> Callable[[dict], bool]:
+    """Match the G512/G513 (0x8080, full-size) for one region. Extras wiring
+    is per-model on this family — the G512 wires exactly two indicators; a
+    G810 (media cluster) or G910 (G-keys, nameplate) needs its own variant."""
+    named = _name_contains("G512", "G513")
+
+    def match(hint: dict) -> bool:
+        if hint.get("kind") != "keyboard":
+            return False
+        if not named(hint):
+            return False
+        if not _has_numpad(hint):  # G512/G513 are full-size
+            return False
+        return _keyboard_family(hint) == family
+
+    return match
+
+
+# G512/G513 — regional full-size base + the two wired indicator LEDs.
+# Registered ahead of the generic family matchers so it wins for this model.
+for _family, (_full, _tkl) in _FAMILY_LAYOUTS.items():
+    register_layout(0x8080, _g512_matcher(_family), keyboard_g512.with_indicators(_full))
 
 # PER_KEY_LIGHTING = 0x8080 (G810 family) and PER_KEY_LIGHTING_V2 = 0x8081
 # share Solaar's per-key zone numbering (0x8080 wire addressing is translated

@@ -107,3 +107,37 @@ def test_keyboard_family_routing(feature, country_code, expected_layout):
 @pytest.mark.parametrize("feature", [0x8080, 0x8081])
 def test_tkl_routing(feature):
     assert layout_for(feature, _family_hint(0x01, full_size=False)) is keyboard_ansi.LAYOUT_TKL
+
+
+# --- G512/G513 (0x8080) indicator LEDs ---
+
+
+def _g512_hint(name="G512 SE", country=0x38):
+    return {
+        "kind": "keyboard",
+        "codename": name,
+        "name": name,
+        "keyboard_layout": country,
+        "zones": [1, 2, 80, 95, 241, 242],
+    }
+
+
+def test_g512_gets_positioned_indicators():
+    layout = layout_for(0x8080, _g512_hint())
+
+    assert layout.description == "G512"
+    indicators = {c.zone_id: (c.row, c.col) for c in layout.cells if c.zone_id in (241, 242)}
+    assert indicators == {241: (0, 17), 242: (0, 18)}
+    # ABNT2 country code still routes the ISO QWERTY main block underneath.
+    assert any(c.zone_id == 97 for c in layout.cells)
+
+
+def test_g512_indicators_are_8080_only():
+    # The same name on a 0x8081 board keeps the generic regional layout.
+    assert layout_for(0x8081, _g512_hint()) is keyboard_iso_qwerty.LAYOUT_FULL
+
+
+def test_other_8080_fullsize_keeps_generic_layout():
+    # Extras wiring is per-model; a G810 has no verified positions yet.
+    hint = _g512_hint(name="G810", country=0x01)
+    assert layout_for(0x8080, hint) is keyboard_ansi.LAYOUT_FULL
