@@ -1,4 +1,11 @@
+import pytest
+
 from solaar.ui.perkey.binding import bind
+from solaar.ui.perkey.layouts import keyboard_ansi
+from solaar.ui.perkey.layouts import keyboard_iso_azerty
+from solaar.ui.perkey.layouts import keyboard_iso_qwerty
+from solaar.ui.perkey.layouts import keyboard_iso_qwertz
+from solaar.ui.perkey.layouts import keyboard_jis
 from solaar.ui.perkey.layouts import layout_for
 
 # PRO X RAPID hardware-probed media zones (board-specific, not canonical 153-158).
@@ -60,3 +67,43 @@ def test_non_rapid_tkl_unaffected():
 
     assert layout.description != "PRO X RAPID"
     assert not any(c.group == "media" for c in layout.cells)
+
+
+# --- Keyboard family routing (0x4540 country codes) ---
+# Codes are Logitech-private (official-app enum), NOT HID HUT codes.
+
+_FULL_ZONES = [80, 95]  # numpad zones flag a full-size board
+
+
+def _family_hint(country_code, full_size=True):
+    return {
+        "kind": "keyboard",
+        "keyboard_layout": country_code,
+        "zones": _FULL_ZONES if full_size else [1, 2, 3],
+    }
+
+
+_EXPECTED_FAMILY = [
+    (0x01, keyboard_ansi.LAYOUT_FULL),  # US
+    (0x03, keyboard_iso_qwerty.LAYOUT_FULL),  # UK
+    (0x04, keyboard_iso_qwertz.LAYOUT_FULL),  # German
+    (0x05, keyboard_iso_azerty.LAYOUT_FULL),  # French
+    (0x09, keyboard_ansi.LAYOUT_FULL),  # Korean
+    (0x0A, keyboard_jis.LAYOUT_FULL),  # Japanese
+    (0x0D, keyboard_iso_qwertz.LAYOUT_FULL),  # Swiss
+    (0x11, keyboard_iso_azerty.LAYOUT_FULL),  # Belgian
+    (0x38, keyboard_iso_qwerty.LAYOUT_FULL),  # Brazilian ABNT2 (hardware-confirmed)
+    (None, keyboard_ansi.LAYOUT_FULL),  # missing code defaults to ANSI
+    (0x7F, keyboard_ansi.LAYOUT_FULL),  # unknown code defaults to ANSI
+]
+
+
+@pytest.mark.parametrize("country_code, expected_layout", _EXPECTED_FAMILY)
+@pytest.mark.parametrize("feature", [0x8080, 0x8081])
+def test_keyboard_family_routing(feature, country_code, expected_layout):
+    assert layout_for(feature, _family_hint(country_code)) is expected_layout
+
+
+@pytest.mark.parametrize("feature", [0x8080, 0x8081])
+def test_tkl_routing(feature):
+    assert layout_for(feature, _family_hint(0x01, full_size=False)) is keyboard_ansi.LAYOUT_TKL
