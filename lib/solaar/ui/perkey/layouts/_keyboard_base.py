@@ -184,6 +184,7 @@ EXTRAS_ALLOWLIST: frozenset[int] = frozenset(
         156,  # Mute
         157,  # Next
         158,  # Previous
+        159,  # Stop (G810/G610 media block)
         180,  # G1
         181,  # G2
         182,  # G3

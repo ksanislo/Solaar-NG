@@ -1540,6 +1540,7 @@ KEYCODES = NamedInts(
         "MUTE": 156,
         "NEXT": 157,
         "PREVIOUS": 158,
+        "STOP": 159,
         "G1": 180,
         "G2": 181,
         "G3": 182,

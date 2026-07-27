@@ -924,6 +924,7 @@ def test_key_template(test, mocker):
         (0x0001, 0xE7, 111),  # RightGUI
         (0x0002, 0xCD, 155),  # Play/Pause (consumer)
         (0x0002, 0xB5, 157),  # Next (consumer)
+        (0x0002, 0xB7, 159),  # Stop (consumer, G810/G610 media block)
         (0x0004, 0x01, 180),  # G1
         (0x0004, 0x09, 188),  # G9 (G910)
         (0x0010, 0x01, 210),  # Logo

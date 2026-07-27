@@ -127,7 +127,8 @@ def test_g512_gets_positioned_indicators():
 
     assert layout.description == "G512"
     indicators = {c.zone_id: (c.row, c.col) for c in layout.cells if c.zone_id in (241, 242)}
-    assert indicators == {241: (0, 17), 242: (0, 18)}
+    # Caps above Num Lock, Game Mode above numpad / (hardware-reported order).
+    assert indicators == {242: (0, 17), 241: (0, 18)}
     # ABNT2 country code still routes the ISO QWERTY main block underneath.
     assert any(c.zone_id == 97 for c in layout.cells)
 
@@ -137,7 +138,70 @@ def test_g512_indicators_are_8080_only():
     assert layout_for(0x8081, _g512_hint()) is keyboard_iso_qwerty.LAYOUT_FULL
 
 
-def test_other_8080_fullsize_keeps_generic_layout():
-    # Extras wiring is per-model; a G810 has no verified positions yet.
-    hint = _g512_hint(name="G810", country=0x01)
+def test_unknown_8080_fullsize_keeps_generic_layout():
+    # Extras wiring is per-model; unknown boards keep the generic layout.
+    hint = _g512_hint(name="G-UNKNOWN", country=0x01)
     assert layout_for(0x8080, hint) is keyboard_ansi.LAYOUT_FULL
+
+
+# --- G810/G610, G910, G Pro (0x8080) special-key strips ---
+
+
+def _cells_by_zone(layout):
+    return {c.zone_id: (c.row, c.col) for c in layout.cells}
+
+
+def test_g810_gets_top_strip():
+    layout = layout_for(0x8080, _g512_hint(name="G810 Orion Spectrum", country=0x01))
+
+    assert layout.description == "G810/G610"
+    cells = _cells_by_zone(layout)
+    assert cells[210] == (0, 0)  # logo
+    assert cells[244] == (0, 12) and cells[242] == (0, 13) and cells[243] == (0, 14)  # num/caps/scroll
+    assert cells[241] == (0, 16) and cells[240] == (0, 18)  # game mode, lighting
+    assert cells[156] == (0, 19)  # mute above the media block
+    assert cells[155] == (1, 17) and cells[159] == (1, 18)  # play, stop
+    assert cells[158] == (1, 19) and cells[157] == (1, 20)  # previous, next
+    assert cells[38] == (1, 0)  # Esc pushed down one row
+
+
+def test_g610_shares_g810_strip():
+    layout = layout_for(0x8080, _g512_hint(name="G610 Orion Brown", country=0x01))
+    assert layout.description == "G810/G610"
+
+
+def test_g910_gets_side_strip():
+    layout = layout_for(0x8080, _g512_hint(name="G910 Orion Spark", country=0x01))
+
+    assert layout.description == "G910"
+    cells = _cells_by_zone(layout)
+    assert cells[38] == (1, 1)  # Esc pushed down and right
+    assert cells[210] == (1, 0)  # logo left of Esc
+    # G6-G9 directly above F1-F4 (F1 lands at row 1, col 3 after the shifts).
+    assert cells[55] == (1, 3)
+    assert {z: cells[z] for z in (185, 186, 187, 188)} == {185: (0, 3), 186: (0, 4), 187: (0, 5), 188: (0, 6)}
+    # G1-G5 down the left edge, nameplate on its own bottom row.
+    assert {z: cells[z] for z in (180, 181, 182, 183, 184)} == {
+        180: (2, 0),
+        181: (3, 0),
+        182: (4, 0),
+        183: (5, 0),
+        184: (6, 0),
+    }
+    assert cells[211] == (7, 4)
+    # Media cluster is deliberately absent (on/off backlight, not RGB).
+    assert 155 not in cells and 156 not in cells
+
+
+def test_gpro_tkl_gets_top_strip():
+    hint = _g512_hint(name="Pro Gaming Keyboard", country=0x01)
+    hint["zones"] = [1, 2, 38]  # no numpad -> TKL
+    layout = layout_for(0x8080, hint)
+
+    assert layout.description == "G PRO"
+    cells = _cells_by_zone(layout)
+    assert cells[210] == (0, 0)
+    assert cells[242] == (0, 12) and cells[243] == (0, 13)
+    assert cells[241] == (0, 15) and cells[240] == (0, 16)
+    assert 244 not in cells  # no Num Lock indicator on a TKL
+    assert cells[38] == (1, 0)

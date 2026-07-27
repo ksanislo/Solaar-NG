@@ -18,12 +18,11 @@
 the two wired indicator LEDs.
 
 The G512 enumerates the full G810-family superset (five indicators, five
-international ids) but physically wires only two indicators — game mode
-(0x40/0x02) and caps lock (0x40/0x03) — located in the F-row line above
-Num Lock and numpad divide (hardware-verified on a G512 ABNT2; the pair's
-left/right order within that area is not yet verified). Other 0x8080 models
-carry different extras (G810 media cluster, G910 G-keys/nameplate) and need
-their own variants once positional references exist.
+international ids) but physically wires only two indicators — caps lock
+(0x40/0x03) above Num Lock and game mode (0x40/0x02) above numpad divide
+(positions and ids hardware-reported on a G512 ABNT2). Other 0x8080 models
+carry different extras; see keyboard_g810_family for the G810/G610, G910
+and G Pro variants.
 """
 
 from __future__ import annotations
@@ -31,11 +30,11 @@ from __future__ import annotations
 from ..layout import Cell
 from ..layout import Layout
 
-# Solaar zones: 241 = game mode indicator, 242 = caps lock indicator.
+# Solaar zones: 242 = caps lock indicator, 241 = game mode indicator.
 # Row 0 cols 17-18 sit above NumLock / numpad divide in the full-size grid.
 INDICATOR_CELLS: tuple[Cell, ...] = (
-    Cell(zone_id=241, row=0, col=17, group="extras", label="Game"),
-    Cell(zone_id=242, row=0, col=18, group="extras", label="Caps"),
+    Cell(zone_id=242, row=0, col=17, group="extras", label="Caps"),
+    Cell(zone_id=241, row=0, col=18, group="extras", label="Game"),
 )
 
 

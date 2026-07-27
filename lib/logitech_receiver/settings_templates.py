@@ -4195,8 +4195,8 @@ _PERKEY_V1_KT_CONSUMER = 0x0002
 _PERKEY_V1_KT_GKEY = 0x0004
 _PERKEY_V1_KT_LOGO = 0x0010
 _PERKEY_V1_KT_INDICATOR = 0x0040
-# consumer usage → KEYCODES zone (Play/Pause, Mute, Next, Previous)
-_PERKEY_V1_CONSUMER_TO_ZONE = {0xCD: 155, 0xE2: 156, 0xB5: 157, 0xB6: 158}
+# consumer usage → KEYCODES zone (Play/Pause, Mute, Next, Previous, Stop)
+_PERKEY_V1_CONSUMER_TO_ZONE = {0xCD: 155, 0xE2: 156, 0xB5: 157, 0xB6: 158, 0xB7: 159}
 _PERKEY_V1_LOGO_TO_ZONE = {0x01: 210, 0x02: 211}  # 0x02 = G910 nameplate
 # 0x01 lighting key, 0x02 game mode, 0x03 caps, 0x04 scroll, 0x05 num
 _PERKEY_V1_INDICATOR_TO_ZONE = {0x01: 240, 0x02: 241, 0x03: 242, 0x04: 243, 0x05: 244}
