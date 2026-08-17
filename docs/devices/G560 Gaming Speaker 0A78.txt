@@ -1,5 +1,5 @@
 G560 Gaming Speaker
-     Device path  : /dev/hidraw11
+     Device path  : /dev/hidraw1
      USB id       : 046d:0A78
      Codename     : G560 Gaming Speaker
      Kind         : speaker
@@ -10,14 +10,14 @@ G560 Gaming Speaker
                  0: U1  22.04.B0370
      Supports 10 HID++ 2.0 features:
          0: ROOT                   {0000} V0
-         1: FEATURE SET            {0001}
-         2: DEVICE FW VERSION      {0003}
+         1: FEATURE SET            {0001} V0
+         2: DEVICE FW VERSION      {0003} V2
             Firmware: 0 U1  22.04.B0370 0A78
             Unit ID: FFFFFFFF  Model ID: 000000000A78  Transport IDs: {'btid': '0000', 'btleid': '0000'}
-         3: DEVICE NAME            {0005}
+         3: DEVICE NAME            {0005} V0
             Name: G560 Gaming Speaker
             Kind: speaker
-         4: COLOR LED EFFECTS      {8070}
+         4: COLOR LED EFFECTS      {8070} V5
             Zone 0 (Left Front): 5 effect(s)
               [0] 0x00 Disabled       caps 0x0000=none                  default 0ms  params: —
               [1] 0x01 Static         caps 0x0000=none                  default 0ms  params: color, ramp
@@ -43,22 +43,26 @@ G560 Gaming Speaker
               [3] 0x07 Audio Visualizer caps 0x0067=color+fade+period++0x0060 default 1000ms  params: cycle, color, period
               [4] 0x0a Breathe        caps 0xc105=color+period+fw++0x0100 default 60ms  params: color, period, form, intensity
             LED Control (saved): False
-            LED Control        : False
-            LEDs Left Front (saved): !LEDEffectSetting {ID: 7, color: 0xff7800, cycle: 0, direction: 0, form: 0, intensity: 0, period: 5000, ramp: 0, saturation: 0, speed: 0}
-            LEDs Left Front        : !LEDEffectSetting {ID: 7, color: 0xff6000, cycle: 0, period: 4839}
-            LEDs Right Front (saved): !LEDEffectSetting {ID: 7, color: 0xff7800, cycle: 0, direction: 0, form: 0, intensity: 0, period: 5000, ramp: 0, saturation: 0, speed: 0}
-            LEDs Right Front        : !LEDEffectSetting {ID: 7, color: 0xff6000, cycle: 0, period: 4839}
-            LEDs Left Rear (saved): !LEDEffectSetting {ID: 7, color: 0xf6f5f4, cycle: 0, direction: 0, form: 0, intensity: 100, period: 5000, ramp: 0, saturation: 0, speed: 0}
-            LEDs Left Rear        : !LEDEffectSetting {ID: 7, color: 0xffffff, cycle: 0, period: 4839}
-            LEDs Right Rear (saved): !LEDEffectSetting {ID: 7, color: 0xf6f5f4, cycle: 0, direction: 0, form: 0, intensity: 0, period: 5000, ramp: 0, saturation: 0, speed: 0}
-            LEDs Right Rear        : !LEDEffectSetting {ID: 7, color: 0xffffff, cycle: 0, period: 4839}
-         5: GKEY                   {8010}
+            LED Control        : True
+            LEDs Left Front (saved): !LEDEffectSetting {ID: 7, color: 0x00dbff, cycle: 0, direction: 0, form: 0, intensity: 0, period: 5000, ramp: 0, saturation: 0, speed: 0}
+            LEDs Left Front        : !LEDEffectSetting {ID: 1, color: 0xd04809, ramp: 2}
+            LEDs Right Front (saved): !LEDEffectSetting {ID: 7, color: 0x00dbff, cycle: 0, direction: 0, form: 0, intensity: 100, period: 5000, ramp: 0, saturation: 0, speed: 0}
+            LEDs Right Front        : !LEDEffectSetting {ID: 1, color: 0x7f2c06, ramp: 2}
+            LEDs Left Rear (saved): !LEDEffectSetting {ID: 7, color: 0xff0081, cycle: 0, direction: 0, form: 0, intensity: 100, period: 5000, ramp: 0, saturation: 0, speed: 0}
+            LEDs Left Rear        : !LEDEffectSetting {ID: 1, color: 0x812d06, ramp: 2}
+            LEDs Right Rear (saved): !LEDEffectSetting {ID: 7, color: 0xff0081, cycle: 0, direction: 0, form: 0, intensity: 0, period: 5000, ramp: 0, saturation: 0, speed: 0}
+            LEDs Right Rear        : !LEDEffectSetting {ID: 1, color: 0x7f2c06, ramp: 2}
+            Startup Animation (saved): False
+            Startup Animation        : False
+         5: GKEY                   {8010} V0
             Divert G and M Keys (saved): False
             Divert G and M Keys        : False
-         6: EQUALIZER              {8310}
-         7: HEADSET OUT            {8320}
-         8: BRIGHTNESS CONTROL     {8040}
+         6: EQUALIZER              {8310} V3
+         7: JACK DETECTION         {8320} V0
+         8: BRIGHTNESS CONTROL     {8040} V0
             Brightness Control (saved): 100
             Brightness Control        : 100
-         9: unknown:8305           {0583} V0
+         9: BASS TONE              {8305} V0
+            Bass Level (saved): 50
+            Bass Level        : 50
      Battery status unavailable.
