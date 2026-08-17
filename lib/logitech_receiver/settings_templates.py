@@ -1596,6 +1596,12 @@ class BassTone(settings.Setting):
     min_value = 0
     max_value = 100
 
+    @classmethod
+    def build(cls, device):
+        if device_quirks.setting_inert(device, cls.name):
+            return None
+        return super().build(device)
+
 
 class Equalizer(settings.RangeFieldSetting):
     name = "equalizer"
@@ -1604,6 +1610,12 @@ class Equalizer(settings.RangeFieldSetting):
     feature = _F.EQUALIZER
     rw_options = {"read_fnid": 0x20, "write_fnid": 0x30, "read_prefix": b"\x00"}
     keys_universe = []
+
+    @classmethod
+    def build(cls, device):
+        if device_quirks.setting_inert(device, cls.name):
+            return None
+        return super().build(device)
 
     class validator_class(settings_validator.PackedRangeValidator):
         kind = settings.Kind.GRAPHIC_EQ
