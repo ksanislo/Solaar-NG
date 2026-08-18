@@ -190,9 +190,15 @@ def _print_device(dev, num=None):
         print("     Model ID:     ", dev.modelId)
     if dev.unitId:
         print("     Unit ID:      ", dev.unitId)
-    if dev.firmware:
-        for fw in dev.firmware:
-            print(f"       {fw.kind:11}:", (fw.name + " " + fw.version).strip())
+    # Lead with the main firmware the way Logitech writes it, then the remaining
+    # entities as before -- solaar show is a dump, so nothing stops being printed.
+    main_firmware = common.main_firmware(dev.firmware)
+    if main_firmware:
+        print("     Firmware     :", common.firmware_display_version(main_firmware))
+    for fw in dev.firmware or ():
+        entity = (fw.name + " " + fw.version).strip()
+        if fw is not main_firmware and entity:
+            print("       %-11s: %s" % (common.FirmwareKind(fw.kind).name, entity))
 
     if dev.power_switch_location:
         print(f"     The power switch is located on the {dev.power_switch_location}.")
