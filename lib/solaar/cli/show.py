@@ -51,9 +51,15 @@ def _print_receiver(receiver):
         pending = hidpp10.get_configuration_pending_flags(receiver)
         if pending:
             print(f"  C Pending    : {pending:02x}")
-    if receiver.firmware:
-        for f in receiver.firmware:
-            print("    %-11s: %s" % (f.kind, f.version))
+    # Lead with the main firmware the way Logitech writes it, then the remaining
+    # entities raw -- a receiver has no feature dump, so this is the only place
+    # its bootloader and hardware revision are ever reported.
+    main_firmware = common.main_firmware(receiver.firmware)
+    if main_firmware:
+        print("  Firmware     :", common.firmware_display_version(main_firmware))
+    for f in receiver.firmware or ():
+        if f is not main_firmware:
+            print("    %-11s: %s" % (common.FirmwareKind(f.kind).name, f.version))
 
     if is_centurion:
         print("  Has", paired_count, f"device(s) out of a maximum of {int(receiver.max_devices)}.")

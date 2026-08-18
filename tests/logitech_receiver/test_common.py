@@ -375,6 +375,7 @@ def _fw(name, version, kind=common.FirmwareKind.Firmware):
         ("MPM", "27.00.B0016", "27.0.16"),  # prefix dropped, as Logitech writes it
         ("MPM", "27.00", "27.0"),  # no build reported, none invented
         ("", "1.16", "1.16"),  # Centurion two-part form
+        ("", "04.02.B0009", "4.2.9"),  # HID++ 1.0 receiver, as the official app writes it
         ("MPM", "1A.2B", "MPM 1A.2B"),  # unparsable falls back to the raw fields
         ("", "5", "5"),  # hardware revision is a bare integer
         ("", "", ""),
