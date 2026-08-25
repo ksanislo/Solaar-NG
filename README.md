@@ -1,3 +1,23 @@
+# Solaar-NG
+
+A custom fork of Solaar for testing of pre-merge features.
+
+Most of the work that originally lived in this fork has now been merged into upstream Solaar — including support for the G515 LS TKL keyboard and the PRO X 2 LIGHTSPEED headphones. The only remaining fork-only feature is **G522 LIGHTSPEED headphones support**, and that is also under active review for upstream merge.
+
+If you don't have a G522, you should generally just use upstream Solaar — it has everything else that used to be unique to this fork.
+
+If you do have a G522 (or another headphone using the same Centurion transport variant), this fork still gives you working support today. Features include Mic SNR, side tone, sleep mode, and EQ, mirroring what's already supported on the PRO X 2 LS.
+
+Support can be added for additional features if someone who owns a pair of headphones supporting them is willing to help with testing. Please create a new issue with a subject containing your headphone model if you're willing to help get your model fully supported.
+
+Please let me know with a new github issue if you find any bugs that are present in this fork but not in upstream Solaar.
+
+Happy testing,
+Ken Sanislo
+
+
+========
+
 # <img src="https://pwr-solaar.github.io/Solaar/img/solaar.svg" width="60px"/> Solaar
 
 Solaar is a Linux manager for many Logitech keyboards, mice, and other devices
