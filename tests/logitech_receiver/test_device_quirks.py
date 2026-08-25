@@ -121,3 +121,32 @@ def test_equalizer_suppressed_on_stubbed_firmware():
 
 def test_equalizer_built_on_firmware_with_hardware_eq():
     assert settings_templates.Equalizer.build(_g560_equalizer_device("122.03.B0022")) is not None
+
+
+G915_TKL = "B35F408EC343"
+
+
+@pytest.mark.parametrize(
+    "model_id, expected",
+    [
+        (G915_TKL, 12),  # F-row is G1..G12
+        (G560, 0),  # a speaker, listed for another quirk but not this one
+        ("", 0),
+        ("NOTAMODEL", 0),
+    ],
+)
+def test_gkeys_are_fkeys(model_id, expected):
+    assert device_quirks.gkeys_are_fkeys(FakeDevice(model_id=model_id)) == expected
+
+
+def test_gkeys_are_fkeys_ignores_experimental(monkeypatch):
+    """A compatibility shim, not a safety allowlist — SOLAAR_EXPERIMENTAL must not
+    hand the quirk to a device that was never listed for it."""
+    monkeypatch.setenv("SOLAAR_EXPERIMENTAL", "1")
+
+    assert device_quirks.gkeys_are_fkeys(FakeDevice(model_id=G560)) == 0
+    assert device_quirks.gkeys_are_fkeys(FakeDevice(model_id=G915_TKL)) == 12
+
+
+def test_gkeys_are_fkeys_missing_model_id():
+    assert device_quirks.gkeys_are_fkeys(object()) == 0
