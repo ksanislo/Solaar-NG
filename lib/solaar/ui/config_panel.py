@@ -816,6 +816,8 @@ _icons_allowables = {v: k for k, v in _allowables_icons.items()}
 # the zone index (rgb_zone_1, rgb_zone_2, ...).
 _SW_CONTROL_DEPENDENT_NAMES = ("rgb_idle_timeout", "rgb_idle_effect", "rgb_sleep_timeout")
 _SW_CONTROL_DEPENDENT_PREFIXES = ("rgb_zone_",)
+# 0x8070 analog of rgb_control/rgb_zone_: led_zone_* rows need led_control on.
+_LED_CONTROL_DEPENDENT_PREFIXES = ("led_zone_",)
 # headset_led_control = whether Solaar holds the live-coloring claim (off lets
 # another app drive the LEDs). The 0x0620 per-zone painting and the 0x0621
 # onboard effect are both live LED control, so both need the claim; per-zone
@@ -847,9 +849,10 @@ def _sw_control_blocked(device):
 
 
 def _led_control_blocked(device):
-    """True when the 0x8070 LED Control is off (Device/firmware mode) — the
-    per-key buffer it pairs with has no effect. Reads setting._value first,
-    then the persister; accepts the current bool or a legacy int 0/1."""
+    """True when the 0x8070 LED Control is off (Device/firmware mode) — its
+    led_zone_* rows and the per-key buffer it pairs with have no effect.
+    Reads setting._value first, then the persister; accepts the current bool
+    or a legacy int 0/1."""
     persister = getattr(device, "persister", None)
     if persister is None:
         return False
@@ -938,6 +941,8 @@ def _gate_blocks(device, name):
     completions can't undo the grey-out when their callbacks land later."""
     if name in _SW_CONTROL_DEPENDENT_NAMES or any(name.startswith(p) for p in _SW_CONTROL_DEPENDENT_PREFIXES):
         return _sw_control_blocked(device)
+    if any(name.startswith(p) for p in _LED_CONTROL_DEPENDENT_PREFIXES):
+        return _led_control_blocked(device)
     if name == "per-key-lighting":
         # Generations pair 0x8070 zones with 0x8080 per-key and 0x8071 zones
         # with 0x8081 per-key — gate V1 on led_control, V2 on rgb_control.
@@ -969,6 +974,7 @@ def _apply_rgb_gates(device):
         if (
             name in _SW_CONTROL_DEPENDENT_NAMES
             or any(name.startswith(p) for p in _SW_CONTROL_DEPENDENT_PREFIXES)
+            or any(name.startswith(p) for p in _LED_CONTROL_DEPENDENT_PREFIXES)
             or name == "per-key-lighting"
             or name in _HEADSET_LED_DEPENDENT_NAMES
         ):
@@ -1019,9 +1025,13 @@ def _change_click(button, sbox):
     # The lock icon on rgb_control, any zone, per-key, or headset_led_control
     # can change whether a dependent row is functional — re-evaluate the gate.
     name = sbox.setting.name
-    if name in ("rgb_control", "per-key-lighting", "headset_led_control", "headset-onboard-effect") or name.startswith(
-        "rgb_zone_"
-    ):
+    if name in (
+        "rgb_control",
+        "led_control",
+        "per-key-lighting",
+        "headset_led_control",
+        "headset-onboard-effect",
+    ) or name.startswith(("rgb_zone_", "led_zone_")):
         _apply_rgb_gates(sbox.setting._device)
     return True
 
@@ -1125,9 +1135,13 @@ def _update_setting_item(sbox, value, is_online=True, sensitive=True, null_okay=
         logger.warning("%s: error setting control value (%s): %s", sbox.setting.name, sbox.setting._device, repr(e))
     sbox._control.set_sensitive(sensitive is True and can_function)
     _change_icon(sensitive, sbox._change_icon)
-    # rgb_control / rgb_zone_* gate per-key; headset_led_control and the
-    # headset-onboard-effect gate the per-zone row — re-evaluate on a change.
-    if name in ("rgb_control", "headset_led_control", "headset-onboard-effect") or name.startswith("rgb_zone_"):
+    # A control/zone/onboard-effect change can flip a dependent row's gate.
+    if name in (
+        "rgb_control",
+        "led_control",
+        "headset_led_control",
+        "headset-onboard-effect",
+    ) or name.startswith(("rgb_zone_", "led_zone_")):
         _apply_rgb_gates(sbox.setting._device)
 
 
