@@ -659,6 +659,33 @@ def firmware_version_tuple(firmware: FirmwareInfo) -> tuple[int, int, int] | Non
     return number, revision, build
 
 
+def main_firmware(firmware: Iterable[FirmwareInfo] | None) -> FirmwareInfo | None:
+    """The main firmware entity, the one Logitech versions a device by.
+
+    Several entities can report kind Firmware; take the highest, as G HUB does.
+    """
+    candidates = [fw for fw in firmware or () if fw.kind == FirmwareKind.Firmware]
+    parsed = [fw for fw in candidates if firmware_version_tuple(fw) is not None]
+    if parsed:
+        return max(parsed, key=firmware_version_tuple)
+    return candidates[0] if candidates else None
+
+
+def firmware_display_version(firmware: FirmwareInfo) -> str:
+    """A firmware version written the way Logitech writes it, e.g. "122.4.370".
+
+    Unparsable versions fall back to the raw name and version, so nothing is
+    ever hidden just because a device numbers itself unusually.
+    """
+    parsed = firmware_version_tuple(firmware)
+    if parsed is None:
+        return (firmware.name + " " + firmware.version).strip()
+    number, revision, build = parsed
+    if len(firmware.version.strip().split(".")) < 3:
+        return f"{number}.{revision}"
+    return f"{number}.{revision}.{build}"
+
+
 class BatteryStatus(Flag):
     DISCHARGING = 0x00
     RECHARGING = 0x01

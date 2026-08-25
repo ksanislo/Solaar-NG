@@ -51,9 +51,15 @@ def _print_receiver(receiver):
         pending = hidpp10.get_configuration_pending_flags(receiver)
         if pending:
             print(f"  C Pending    : {pending:02x}")
-    if receiver.firmware:
-        for f in receiver.firmware:
-            print("    %-11s: %s" % (f.kind, f.version))
+    # Lead with the main firmware the way Logitech writes it, then the remaining
+    # entities raw -- a receiver has no feature dump, so this is the only place
+    # its bootloader and hardware revision are ever reported.
+    main_firmware = common.main_firmware(receiver.firmware)
+    if main_firmware:
+        print("  Firmware     :", common.firmware_display_version(main_firmware))
+    for f in receiver.firmware or ():
+        if f is not main_firmware:
+            print("    %-11s: %s" % (common.FirmwareKind(f.kind).name, f.version))
 
     if is_centurion:
         print("  Has", paired_count, f"device(s) out of a maximum of {int(receiver.max_devices)}.")
@@ -190,9 +196,15 @@ def _print_device(dev, num=None):
         print("     Model ID     :", dev.modelId)
     if dev.unitId:
         print("     Unit ID      :", dev.unitId)
-    if dev.firmware:
-        for fw in dev.firmware:
-            print(f"       {fw.kind:11}:", (fw.name + " " + fw.version).strip())
+    # Lead with the main firmware the way Logitech writes it, then the remaining
+    # entities as before -- solaar show is a dump, so nothing stops being printed.
+    main_firmware = common.main_firmware(dev.firmware)
+    if main_firmware:
+        print("     Firmware     :", common.firmware_display_version(main_firmware))
+    for fw in dev.firmware or ():
+        entity = (fw.name + " " + fw.version).strip()
+        if fw is not main_firmware and entity:
+            print("       %-11s: %s" % (common.FirmwareKind(fw.kind).name, entity))
 
     layout_code = dev.keyboard_layout
     if layout_code is not None:

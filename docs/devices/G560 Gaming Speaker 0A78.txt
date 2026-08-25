@@ -1,5 +1,5 @@
 G560 Gaming Speaker
-     Device path  : /dev/hidraw1
+     Device path  : /dev/hidraw20
      USB id       : 046d:0A78
      Codename     : G560 Gaming Speaker
      Kind         : speaker
@@ -7,7 +7,7 @@ G560 Gaming Speaker
      Serial number:
      Model ID:      000000000A78
      Unit ID:       FFFFFFFF
-                 0: U1  22.04.B0370
+     Firmware     : 122.4.370
      Supports 10 HID++ 2.0 features:
          0: ROOT                   {0000} V0
          1: FEATURE SET            {0001} V0
@@ -45,13 +45,13 @@ G560 Gaming Speaker
             LED Control (saved): False
             LED Control        : True
             LEDs Left Front (saved): !LEDEffectSetting {ID: 7, color: 0x00dbff, cycle: 0, direction: 0, form: 0, intensity: 0, period: 5000, ramp: 0, saturation: 0, speed: 0}
-            LEDs Left Front        : !LEDEffectSetting {ID: 1, color: 0xd04809, ramp: 2}
+            LEDs Left Front        : !LEDEffectSetting {ID: 1, color: 0x7f2c06, ramp: 2}
             LEDs Right Front (saved): !LEDEffectSetting {ID: 7, color: 0x00dbff, cycle: 0, direction: 0, form: 0, intensity: 100, period: 5000, ramp: 0, saturation: 0, speed: 0}
-            LEDs Right Front        : !LEDEffectSetting {ID: 1, color: 0x7f2c06, ramp: 2}
+            LEDs Right Front        : !LEDEffectSetting {ID: 1, color: 0xff590b, ramp: 2}
             LEDs Left Rear (saved): !LEDEffectSetting {ID: 7, color: 0xff0081, cycle: 0, direction: 0, form: 0, intensity: 100, period: 5000, ramp: 0, saturation: 0, speed: 0}
-            LEDs Left Rear        : !LEDEffectSetting {ID: 1, color: 0x812d06, ramp: 2}
+            LEDs Left Rear        : !LEDEffectSetting {ID: 1, color: 0xff590b, ramp: 2}
             LEDs Right Rear (saved): !LEDEffectSetting {ID: 7, color: 0xff0081, cycle: 0, direction: 0, form: 0, intensity: 0, period: 5000, ramp: 0, saturation: 0, speed: 0}
-            LEDs Right Rear        : !LEDEffectSetting {ID: 1, color: 0x7f2c06, ramp: 2}
+            LEDs Right Rear        : !LEDEffectSetting {ID: 1, color: 0xff590b, ramp: 2}
             Startup Animation (saved): False
             Startup Animation        : False
          5: GKEY                   {8010} V0

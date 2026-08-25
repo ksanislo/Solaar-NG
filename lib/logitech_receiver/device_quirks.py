@@ -98,15 +98,9 @@ SETTING_INERT_FIRMWARE: dict[str, dict[str, tuple[tuple | None, tuple | None]]] 
 
 
 def _main_firmware_version(device) -> tuple[int, int, int] | None:
-    """Highest main-firmware version on the device, the entity G HUB reports."""
-    versions = [
-        version
-        for fw in getattr(device, "firmware", None) or ()
-        if fw.kind == common.FirmwareKind.Firmware
-        for version in (common.firmware_version_tuple(fw),)
-        if version is not None
-    ]
-    return max(versions, default=None)
+    """The device's main-firmware version, or None if it can't be read."""
+    firmware = common.main_firmware(getattr(device, "firmware", None))
+    return common.firmware_version_tuple(firmware) if firmware else None
 
 
 def setting_inert(device, setting_name: str) -> bool:
